@@ -1,0 +1,4 @@
+github.com/cspor/go-practice-files v0.0.0-20211206185718-6fba9f116228 h1:wUyUwx2pi8lKCGlM17tOo1T+9fq9GkDYtpeaR88QGQA=
+github.com/cspor/go-practice-files v0.0.0-20211206185718-6fba9f116228/go.mod h1:uDjpcqVZV5jefFiVuiiERM9us90cgXEr0FjcZfKM/E8=
+github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
+github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=

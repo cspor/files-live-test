@@ -32,6 +32,9 @@ func setupRoutes() {
 }
 
 func files(writer http.ResponseWriter, request *http.Request) {
+	fmt.Fprintf(writer, "Starting to write %d pages\n", config.PageCount)
+	fmt.Fprintf(writer, "Starting to write %d rows \n", config.RowCount)
+
 	var waitGroup = sync.WaitGroup{}
 
 	filesystem.RemakeFolder(config.PagesFolder)

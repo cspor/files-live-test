@@ -8,6 +8,7 @@ import (
 	"github.com/cspor/go-practice-files/models/row"
 	"github.com/cspor/go-practice-files/services/errorHandler"
 	"github.com/cspor/go-practice-files/services/filesystem"
+	"github.com/google/uuid"
 	"net/http"
 	"os"
 	"sync"
@@ -35,14 +36,20 @@ func files(writer http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(writer, "Starting to write %d pages\n", config.PageCount)
 	fmt.Fprintf(writer, "Starting to write %d rows \n", config.RowCount)
 
+	id, _ := uuid.NewRandom()
+
+	idString := id.String()
+	pagesFolder := config.PagesFolder + idString
+	buildsFolder := config.BuildsFolder + idString
+
 	var waitGroup = sync.WaitGroup{}
 
-	filesystem.RemakeFolder(config.PagesFolder)
-	filesystem.RemakeFolder(config.BuildsFolder)
+	filesystem.RemakeFolder(pagesFolder)
+	filesystem.RemakeFolder(buildsFolder)
 
 	pagesStart := time.Now()
 
-	writePages(config.PageCount, config.RowCount, &waitGroup, writer)
+	writePages(pagesFolder, config.PageCount, config.RowCount, &waitGroup, writer)
 
 	waitGroup.Wait()
 
@@ -50,25 +57,27 @@ func files(writer http.ResponseWriter, request *http.Request) {
 
 	// write all files in source directory to destination
 	writeStart := time.Now()
-	filesystem.WriteFilesInDirToDestination(config.PagesFolder, config.BuildsFolder, "export_write")
+	filesystem.WriteFilesInDirToDestination(pagesFolder, buildsFolder, "export_write")
 	took("Writing to export", writeStart, writer)
 
 	// copy all files in source directory to destination
 	copyStart := time.Now()
-	filesystem.CopyFilesInDirToDestination(config.PagesFolder, filesystem.OpenFileToAppend(config.BuildsFolder, "export_copy"))
+	filesystem.CopyFilesInDirToDestination(pagesFolder, filesystem.OpenFileToAppend(buildsFolder, "export_copy"))
 	took("Copying to export", copyStart, writer)
 
 	// Cleanup
-	err := os.RemoveAll(config.ParentFolder)
+	err := os.RemoveAll(pagesFolder)
 	errorHandler.Check(err)
+	e := os.RemoveAll(buildsFolder)
+	errorHandler.Check(e)
 	fmt.Fprintf(writer, "Cleaned up")
 }
 
 // writePages Writes rowCount rows to pageCount pages
-func writePages(pageCount int, rowCount int, waitGroup *sync.WaitGroup, writer http.ResponseWriter) {
+func writePages(pagesFolder string, pageCount int, rowCount int, waitGroup *sync.WaitGroup, writer http.ResponseWriter) {
 	for index := 1; index <= pageCount; index++ {
 		waitGroup.Add(1)
-		go writeUUIDsToFile(config.PagesFolder, fmt.Sprint("page_", index), rowCount, waitGroup, writer)
+		go writeUUIDsToFile(pagesFolder, fmt.Sprint("page_", index), rowCount, waitGroup, writer)
 	}
 }
 
